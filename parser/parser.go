@@ -3,12 +3,19 @@ package parser
 import (
 	"bufio"
 	"fmt"
-	"github.com/kanersps/loop/parser/tokenizer"
+	"github.com/kanersps/loop/parser/lexer"
 	"os"
-	"strings"
 )
 
 var variables = map[string]int{}
+
+func parse(value string, lineNumber int) *lexer.Lexer {
+	return lexer.Create(value)
+}
+
+func ParseValue(value string) *lexer.Lexer {
+	return parse(value, 1)
+}
 
 func ParseFile(path string) {
 	file, err := os.Open(path)
@@ -27,11 +34,8 @@ func ParseFile(path string) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		line = strings.Replace(line, "\t", "", -1)
-		line = strings.Replace(line, " ", "", -1)
-
 		if len(line) != 0 {
-			tokenizer.Tokenize(scanner.Text(), lineNumber)
+			parse(scanner.Text(), lineNumber)
 
 			lineNumber++
 		}
