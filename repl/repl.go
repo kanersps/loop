@@ -3,8 +3,8 @@ package repl
 import (
 	"bufio"
 	"fmt"
+	"github.com/kanersps/loop/evaluator"
 	"github.com/kanersps/loop/parser"
-	"github.com/kanersps/loop/parser/tokens"
 	"io"
 )
 
@@ -22,9 +22,18 @@ func Console(input io.Reader, output io.Writer) {
 		line := scanner.Text()
 
 		lexer := parser.ParseValue(line)
+		parser := parser.Create(lexer)
+		program := parser.ParseProgram()
 
-		for tok := lexer.FindToken(); tok.TokenType != tokens.EOF; tok = lexer.FindToken() {
-			fmt.Printf("%+v\n", tok)
+		for _, err := range parser.Errors() {
+			fmt.Println(err)
+		}
+
+		evaluated := evaluator.Eval(program)
+		fmt.Println(evaluated)
+		if evaluated != nil {
+			io.WriteString(output, evaluated.Inspect())
+			io.WriteString(output, "\n")
 		}
 	}
 }
