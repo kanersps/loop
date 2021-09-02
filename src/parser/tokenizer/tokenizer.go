@@ -2,7 +2,7 @@ package tokenizer
 
 import (
 	"fmt"
-	"loop/src/parser/tokenizer/tokens"
+	"github.com/kanersps/loop/parser/tokenizer/tokens"
 	"os"
 	"strconv"
 	"strings"
@@ -28,7 +28,7 @@ func Tokenize(value string, line int) []tokens.Token {
 	return tokens
 }
 
-func GetToken(keyword string, line int) (tokens.Token) {
+func GetToken(keyword string, line int) tokens.Token {
 	returnToken := tokens.Token{}
 
 	if value, err := strconv.Atoi(keyword); err == nil {
@@ -44,7 +44,7 @@ func GetToken(keyword string, line int) (tokens.Token) {
 	} else if previousToken.TokenType == tokens.VariableDeclaration {
 		return tokens.Token{
 			TokenType: tokens.VariableIdentifier,
-			Value: keyword,
+			Value:     keyword,
 		}
 	} else if keyword == "=" {
 		return tokens.Token{

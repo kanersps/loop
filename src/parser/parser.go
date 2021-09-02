@@ -3,7 +3,7 @@ package parser
 import (
 	"bufio"
 	"fmt"
-	"loop/src/parser/tokenizer"
+	"github.com/kanersps/loop/parser/tokenizer"
 	"os"
 	"strings"
 )

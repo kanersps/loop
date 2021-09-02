@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"loop/src/parser"
+	"github.com/kanersps/loop/parser"
 )
 
 func main() {
