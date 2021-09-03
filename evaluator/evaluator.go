@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
 	"github.com/kanersps/loop/ast"
 	"github.com/kanersps/loop/object"
 )
@@ -13,7 +12,6 @@ func Eval(node ast.Node) object.Object {
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
 	case *ast.IntegerLiteral:
-		fmt.Println("NUMBER FOUND")
 		return &object.Integer{Value: node.Value}
 	}
 	return nil

@@ -72,8 +72,8 @@ func Create(l *lexer.Lexer) *Parser {
 	p.registerPrefix(tokens.Identifier, p.parseIdentifier)
 	p.registerPrefix(tokens.Number, p.parseIntegerLiteral)
 
-	p.nextToken()
-	p.nextToken()
+	p.ExtractToken()
+	p.ExtractToken()
 
 	return p
 }
@@ -82,13 +82,13 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
-func (p *Parser) peekError(t tokens.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
+func (p *Parser) FindError(t tokens.TokenType) {
+	msg := fmt.Sprintf("Expected %s, got %s instead",
 		t, p.peekToken)
 	p.errors = append(p.errors, msg)
 }
 
-func (p *Parser) nextToken() {
+func (p *Parser) ExtractToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.FindToken()
 }
@@ -102,7 +102,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
-		p.nextToken()
+		p.ExtractToken()
 	}
 	return program
 }
@@ -134,7 +134,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 	stmt.Expression = p.parseExpression(LOWEST)
 	if p.peekTokenIs(tokens.SemiColon) {
-		p.nextToken()
+		p.ExtractToken()
 	}
 	return stmt
 }
@@ -148,10 +148,12 @@ func (p *Parser) parseVarStatement() ast.Statement {
 	if !p.expectPeek(tokens.Equals) {
 		return nil
 	}
+
 	// TODO: We're skipping the expressions until we // encounter a semicolon
-	for !p.curTokenIs(tokens.SemiColon) {
-		p.nextToken()
+	for !p.curTokenIs(tokens.SemiColon) && !p.curTokenIs(tokens.EOF) {
+		p.ExtractToken()
 	}
+
 	return stmt
 }
 
@@ -180,10 +182,10 @@ func (p *Parser) peekTokenIs(t tokens.TokenType) bool {
 
 func (p *Parser) expectPeek(t tokens.TokenType) bool {
 	if p.peekTokenIs(t) {
-		p.nextToken()
+		p.ExtractToken()
 		return true
 	} else {
-		p.peekError(t)
+		p.FindError(t)
 		return false
 	}
 }

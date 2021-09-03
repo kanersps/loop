@@ -30,7 +30,7 @@ func Console(input io.Reader, output io.Writer) {
 		}
 
 		evaluated := evaluator.Eval(program)
-		fmt.Println(evaluated)
+
 		if evaluated != nil {
 			io.WriteString(output, evaluated.Inspect())
 			io.WriteString(output, "\n")
