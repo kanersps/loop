@@ -51,23 +51,39 @@ func (l *Lexer) FindToken() tokens.Token {
 		token = tokens.LeftBrace
 	case '}':
 		token = tokens.RightBrace
+	case '!':
+		token = tokens.Bang
+	case '*':
+		token = tokens.Asterisk
+	case '/':
+		token = tokens.Slash
+	case '<':
+		token = tokens.LessThan
+	case '>':
+		token = tokens.GreaterThan
+	case '-':
+		token = tokens.Minus
 	case 0:
 		token = tokens.EOF
 	default:
 		if isLetter(l.ch) {
-			returnToken.Value = l.ReadIdentifier()
-			token = tokens.FindKeyword(returnToken.Value)
+			returnToken.Value = l.ReadIdentifier() // Skips to (
+			returnToken.TokenType = tokens.FindKeyword(returnToken.Value)
+
+			return returnToken
 		} else if isDigit(l.ch) {
-			token = tokens.Number
+			returnToken.TokenType = tokens.Number
 			returnToken.Value = l.readNumber()
+
+			return returnToken
 		} else {
 			token = tokens.Unknown
 		}
 	}
 
-	l.ReadCharacter()
-
 	returnToken.TokenType = token
+
+	l.ReadCharacter() // Skips again
 
 	return returnToken
 }

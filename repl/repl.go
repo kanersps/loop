@@ -36,6 +36,6 @@ func Console(input io.Reader, output io.Writer) {
 			io.WriteString(output, "\n")
 		}
 
-		program.PrintAST()
+		//program.PrintAST()
 	}
 }

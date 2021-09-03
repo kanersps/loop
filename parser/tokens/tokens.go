@@ -8,8 +8,10 @@ type Token struct {
 }
 
 var keywords = map[string]TokenType{
-	"var":   VariableDeclaration,
-	"print": Print,
+	"var":    VariableDeclaration,
+	"print":  Print,
+	"func":   Function,
+	"return": Return,
 }
 
 func FindKeyword(keyword string) TokenType {
@@ -36,4 +38,12 @@ const (
 	LeftBrace           TokenType = 12
 	RightBrace          TokenType = 13
 	EOF                 TokenType = 14
+	Bang                TokenType = 15
+	Asterisk            TokenType = 16
+	Slash               TokenType = 17
+	LessThan            TokenType = 18
+	GreaterThan         TokenType = 19
+	Minus               TokenType = 20
+	Function            TokenType = 21
+	Return              TokenType = 22
 )

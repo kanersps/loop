@@ -70,12 +70,25 @@ func Create(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFns = make(map[tokens.TokenType]prefixParseFn)
 	p.registerPrefix(tokens.Identifier, p.parseIdentifier)
+	p.registerPrefix(tokens.Bang, p.parsePrefixExpression)
+	p.registerPrefix(tokens.Minus, p.parsePrefixExpression)
 	p.registerPrefix(tokens.Number, p.parseIntegerLiteral)
 
 	p.ExtractToken()
 	p.ExtractToken()
 
 	return p
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Value,
+	}
+	fmt.Println(p.curToken)
+	p.ExtractToken()
+	expression.Right = p.parseExpression(PREFIX)
+	return expression
 }
 
 func (p *Parser) Errors() []string {
@@ -85,7 +98,7 @@ func (p *Parser) Errors() []string {
 func (p *Parser) FindError(t tokens.TokenType) {
 	//expected := reflect.ValueOf(&book).Elem()
 
-	msg := fmt.Sprintf("Expected %s, got %s instead",
+	msg := fmt.Sprintf("Expected %v, got %v instead",
 		t, p.peekToken)
 	p.errors = append(p.errors, msg)
 }
@@ -112,6 +125,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.TokenType]
 	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.TokenType)
 		return nil
 	}
 	leftExp := prefix()
@@ -122,6 +136,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.TokenType {
 	case tokens.VariableDeclaration:
 		return p.parseVarStatement()
+	case tokens.Return:
+		return p.parseReturnStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -130,6 +146,12 @@ func (p *Parser) parseStatement() ast.Statement {
 const (
 	_ int = iota
 	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
 )
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
@@ -152,7 +174,21 @@ func (p *Parser) parseVarStatement() ast.Statement {
 	}
 
 	// TODO: We're skipping the expressions until we // encounter a semicolon
-	for !p.curTokenIs(tokens.SemiColon) && !p.curTokenIs(tokens.EOF) {
+	for !p.curTokenIs(tokens.SemiColon) {
+		p.ExtractToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseReturnStatement() ast.Statement {
+	stmt := &ast.ReturnStatement{
+		Token: p.curToken,
+	}
+
+	p.ExtractToken()
+
+	for !p.curTokenIs(tokens.SemiColon) {
 		p.ExtractToken()
 	}
 
@@ -169,6 +205,11 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 	lit.Value = value
 	return lit
+}
+
+func (p *Parser) noPrefixParseFnError(t tokens.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %v found", t)
+	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
