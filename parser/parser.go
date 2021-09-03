@@ -83,6 +83,8 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) FindError(t tokens.TokenType) {
+	//expected := reflect.ValueOf(&book).Elem()
+
 	msg := fmt.Sprintf("Expected %s, got %s instead",
 		t, p.peekToken)
 	p.errors = append(p.errors, msg)

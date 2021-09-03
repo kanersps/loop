@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"github.com/kanersps/loop/parser/tokens"
 )
 
@@ -30,6 +31,12 @@ type Program struct {
 	Statements []Statement
 }
 
+func (program *Program) PrintAST() {
+	for _, stmt := range program.Statements {
+		fmt.Println(stmt.TokenValue())
+	}
+}
+
 type VariableStatement struct {
 	Token tokens.Token
 	Name  *Identifier
@@ -40,7 +47,7 @@ func (vs *VariableStatement) statementNode()     {}
 func (vs *VariableStatement) TokenValue() string { return vs.Token.Value }
 
 type Identifier struct {
-	Token tokens.Token // the token.IDENT token Value string
+	Token tokens.Token
 	Value string
 }
 

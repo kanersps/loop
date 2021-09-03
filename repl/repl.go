@@ -35,5 +35,7 @@ func Console(input io.Reader, output io.Writer) {
 			io.WriteString(output, evaluated.Inspect())
 			io.WriteString(output, "\n")
 		}
+
+		program.PrintAST()
 	}
 }
