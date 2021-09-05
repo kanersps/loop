@@ -1,4 +1,5 @@
-var x = 4;
-var y = 0;
+var add = func(a, b, c) {
+    return a + b + c
+}
 
-print x;
+add(1, 2, 3)
