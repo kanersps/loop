@@ -23,28 +23,28 @@ func TestLexer_FindToken(tester *testing.T) {
 		// First variable assignment
 		{tokens.VariableDeclaration, "var"},
 		{tokens.Identifier, "test"},
-		{tokens.Equals, ""},
+		{tokens.Equals, "="},
 		{tokens.Number, "1"},
-		{tokens.SemiColon, ""},
+		{tokens.SemiColon, ";"},
 
 		// Second variable assignment
 		{tokens.VariableDeclaration, "var"},
 		{tokens.Identifier, "testtwo"},
-		{tokens.Equals, ""},
+		{tokens.Equals, "="},
 		{tokens.Number, "14"},
-		{tokens.SemiColon, ""},
+		{tokens.SemiColon, ";"},
 
 		// First multiply function
 		{tokens.VariableDeclaration, "var"},
 		{tokens.Identifier, "multiply"},
-		{tokens.Equals, ""},
+		{tokens.Equals, "="},
 		{tokens.Function, "func"},
-		{tokens.LeftParentheses, ""},
+		{tokens.LeftParentheses, "("},
 		{tokens.Identifier, "a"},
-		{tokens.Comma, ""},
+		{tokens.Comma, ","},
 		{tokens.Identifier, "b"},
-		{tokens.RightParentheses, ""},
-		{tokens.LeftBrace, ""},
+		{tokens.RightParentheses, ")"},
+		{tokens.LeftBrace, "{"},
 	}
 
 	l := Create(input)
