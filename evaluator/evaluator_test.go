@@ -135,6 +135,7 @@ func TestEval_ErrorHandling(t *testing.T) {
 		{"false + false;", "UNKNOWN-OPERATOR: BOOLEAN + BOOLEAN"},
 		{"if(true) { true + false; }", "UNKNOWN-OPERATOR: BOOLEAN + BOOLEAN"},
 		{"test", "UNKNOWN-IDENTIFIER: test"},
+		{`"Test" - "Test"`, "UNKNOWN-OPERATOR: STRING - STRING"},
 	}
 
 	for _, tc := range tests {
@@ -204,6 +205,37 @@ func TestEval_FunctionExecution(t *testing.T) {
 
 	for _, tc := range tests {
 		testIntegerObject(t, testEval(tc.input), tc.expected)
+	}
+}
+
+func TestEval_Strings(t *testing.T) {
+	input := `"Testing two"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+
+	if !ok {
+		t.Fatalf("Object is not string. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Testing two" {
+		t.Fatalf("String has incorrect value expected=%s. got=%s", "Testing two", str.Value)
+	}
+}
+
+func TestEval_StringConcatenation(t *testing.T) {
+	input := `"Testing" + " " + "two"`
+
+	evaluated := testEval(input)
+
+	str, ok := evaluated.(*object.String)
+
+	if !ok {
+		t.Fatalf("Object is not string. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Testing two" {
+		t.Fatalf("String has incorrect value expected=%s. got=%s", "Testing two", str.Value)
 	}
 }
 

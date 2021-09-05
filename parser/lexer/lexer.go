@@ -74,6 +74,11 @@ func (l *Lexer) FindToken() tokens.Token {
 		returnToken = tokens.Token{TokenType: tokens.GreaterThan, Value: string(l.ch)}
 	case '-':
 		returnToken = tokens.Token{TokenType: tokens.Minus, Value: string(l.ch)}
+	case '"':
+		returnToken = tokens.Token{
+			TokenType: tokens.String,
+			Value:     l.readString(),
+		}
 	case 0:
 		returnToken = tokens.Token{TokenType: tokens.EOF, Value: string(l.ch)}
 	default:
@@ -117,6 +122,19 @@ func (l *Lexer) readNumber() string {
 	for isDigit(l.ch) {
 		l.ReadCharacter()
 	}
+	return l.input[position:l.position]
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.ReadCharacter()
+
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+
 	return l.input[position:l.position]
 }
 

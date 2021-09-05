@@ -56,4 +56,5 @@ const (
 	False               TokenType = 26
 	If                  TokenType = 27
 	Else                TokenType = 27
+	String              TokenType = 28
 )

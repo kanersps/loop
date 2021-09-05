@@ -283,6 +283,28 @@ func TestParser_VarStatements(t *testing.T) {
 	}
 }
 
+func TestParser_Strings(t *testing.T) {
+	input := `"testing two"`
+
+	l := lexer.Create(input)
+	p := Create(l)
+	program := p.ParseProgram()
+
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+
+	str, ok := stmt.Expression.(*ast.StringLiteral)
+
+	if !ok {
+		t.Fatalf("Expression is not *ast.StringLiteral. got=%T", stmt.Expression)
+	}
+
+	if str.Value != "testing two" {
+		t.Errorf("str.Value is not %q. got=%q", "testing two", str.Value)
+	}
+}
+
 func testVarStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenValue() != "var" {
 		t.Errorf("s.TokenLiteral not 'var'. got=%q", s.TokenValue())

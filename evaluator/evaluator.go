@@ -85,6 +85,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return applyFunction(function, args)
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	}
 	return nil
 }
@@ -167,6 +169,10 @@ func evalIfExpression(node *ast.IfExpression, env *object.Environment) object.Ob
 func evalInfixExpression(operator string, left object.Object, right object.Object) object.Object {
 	if left.Type() == object.INTEGER && right.Type() == object.INTEGER {
 		return evalIntegerInfixExpression(operator, left, right)
+	}
+
+	if operator == "+" && left.Type() == object.STRING && right.Type() == object.STRING {
+		return &object.String{Value: left.Inspect() + right.Inspect()}
 	}
 
 	switch operator {

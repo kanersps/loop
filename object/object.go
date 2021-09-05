@@ -14,6 +14,7 @@ const (
 	RETURN   = "RETURN"
 	ERROR    = "ERROR"
 	FUNCTION = "FUNCTION"
+	STRING   = "STRING"
 )
 
 type ObjectType string
@@ -77,4 +78,13 @@ func (f *Function) Inspect() string {
 	out.WriteString(f.Body.String())
 	out.WriteString("\n}")
 	return out.String()
+}
+
+type String struct {
+	Value string
+}
+
+func (s *String) Type() ObjectType { return STRING }
+func (s *String) Inspect() string {
+	return s.Value
 }

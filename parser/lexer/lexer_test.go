@@ -14,6 +14,9 @@ func TestLexer_FindToken(tester *testing.T) {
 	var multiply = func(a, b) {
 		return a * b;
 	}
+
+	"test"
+	"test two"
 `
 
 	tests := []struct {
@@ -45,6 +48,16 @@ func TestLexer_FindToken(tester *testing.T) {
 		{tokens.Identifier, "b"},
 		{tokens.RightParentheses, ")"},
 		{tokens.LeftBrace, "{"},
+		{tokens.Return, "return"},
+		{tokens.Identifier, "a"},
+		{tokens.Asterisk, "*"},
+		{tokens.Identifier, "b"},
+		{tokens.SemiColon, ";"},
+		{tokens.RightBrace, "}"},
+
+		// Strings
+		{tokens.String, "test"},
+		{tokens.String, "test two"},
 	}
 
 	l := Create(input)
