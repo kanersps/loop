@@ -12,6 +12,10 @@ var keywords = map[string]TokenType{
 	"print":  Print,
 	"func":   Function,
 	"return": Return,
+	"true":   True,
+	"false":  False,
+	"if":     If,
+	"else":   Else,
 }
 
 func FindKeyword(keyword string) TokenType {
@@ -46,4 +50,10 @@ const (
 	Minus               TokenType = 20
 	Function            TokenType = 21
 	Return              TokenType = 22
+	NotEquals           TokenType = 23
+	EqualsInfix         TokenType = 24
+	True                TokenType = 25
+	False               TokenType = 26
+	If                  TokenType = 27
+	Else                TokenType = 27
 )

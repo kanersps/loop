@@ -4,12 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/kanersps/loop/evaluator"
+	"github.com/kanersps/loop/object"
 	"github.com/kanersps/loop/parser"
+	"github.com/kanersps/loop/parser/lexer"
 	"io"
 )
 
 func Console(input io.Reader, output io.Writer) {
 	scanner := bufio.NewScanner(input)
+	env := object.NewEnvironment()
 
 	for {
 		fmt.Printf(">> ")
@@ -21,15 +24,15 @@ func Console(input io.Reader, output io.Writer) {
 
 		line := scanner.Text()
 
-		lexer := parser.ParseValue(line)
-		parser := parser.Create(lexer)
+		l := lexer.Create(line)
+		parser := parser.Create(l)
 		program := parser.ParseProgram()
 
-		for _, err := range parser.Errors() {
-			fmt.Println(err)
+		if len(parser.Errors()) != 0 {
+			printParserErrors(output, parser.Errors())
+			continue
 		}
-
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 
 		if evaluated != nil {
 			io.WriteString(output, evaluated.Inspect())
@@ -37,5 +40,11 @@ func Console(input io.Reader, output io.Writer) {
 		}
 
 		//program.PrintAST()
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }

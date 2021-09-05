@@ -3,9 +3,12 @@ package object
 import "fmt"
 
 const (
-	INTEGER = "INTEGER"
-	BOOLEAN = "BOOLEAN"
-	NULL    = "NULL"
+	INTEGER  = "INTEGER"
+	BOOLEAN  = "BOOLEAN"
+	NULL     = "NULL"
+	RETURN   = "RETURN"
+	ERROR    = "ERROR"
+	FUNCTION = "FUNCTION"
 )
 
 type ObjectType string
@@ -33,3 +36,18 @@ type Null struct{}
 
 func (n *Null) Type() ObjectType { return NULL }
 func (n *Null) Inspect() string  { return "null" }
+
+type Return struct {
+	Value Object
+}
+
+func (r *Return) Type() ObjectType { return RETURN }
+func (r *Return) Inspect() string  { return r.Inspect() }
+
+// TODO: Implement line number & column number to more easily debug issues
+type Error struct {
+	Message string
+}
+
+func (e *Error) Type() ObjectType { return ERROR }
+func (e *Error) Inspect() string  { return "Exception: " + e.Message }
