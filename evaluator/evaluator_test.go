@@ -169,6 +169,44 @@ func TestEval_Variables(t *testing.T) {
 	}
 }
 
+func TestEval_Functions(t *testing.T) {
+	input := "func(x) { x * 2; };"
+
+	evaluated := testEval(input)
+	fn, ok := evaluated.(*object.Function)
+
+	if !ok {
+		t.Fatalf("Object is not a function. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(fn.Parameters) != 1 {
+		t.Fatalf("Function has wrong amount of parameters. Parameters=%+v", fn.Parameters)
+	}
+
+	if fn.Parameters[0].String() != "x" {
+		t.Fatalf("Parameter is not 'x'. got=%q", fn.Parameters[0])
+	}
+
+	expectedBody := "(x * 2)"
+
+	if fn.Body.String() != expectedBody {
+		t.Fatalf("Function body is not %q. got=%q", expectedBody, fn.Body.String())
+	}
+}
+
+func TestEval_FunctionExecution(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"var triple = func(x) { x * 3 }; triple(1);", 3},
+	}
+
+	for _, tc := range tests {
+		testIntegerObject(t, testEval(tc.input), tc.expected)
+	}
+}
+
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.Boolean)
 	if !ok {
