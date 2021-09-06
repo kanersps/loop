@@ -107,6 +107,7 @@ func Create(l *lexer.Lexer) *Parser {
 	p.registerPrefix(tokens.If, p.parseIfExpression)
 	p.registerPrefix(tokens.Function, p.parseFunctionLiteral)
 	p.registerPrefix(tokens.String, p.parseStringLiteral)
+	p.registerPrefix(tokens.While, p.parseWhileLiteral)
 
 	// Infix parsers
 	p.infixParseFns = make(map[tokens.TokenType]infixParseFn)
@@ -156,6 +157,28 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 		return nil
 	}
 	return args
+}
+
+func (p *Parser) parseWhileLiteral() ast.Expression {
+	while := &ast.WhileLiteral{
+		Token: p.curToken,
+	}
+
+	if !p.expectPeek(tokens.LeftParentheses) {
+		return nil
+	}
+	p.ExtractToken()
+	while.Condition = p.parseExpression(LOWEST)
+	if !p.expectPeek(tokens.RightParentheses) {
+		return nil
+	}
+	if !p.expectPeek(tokens.LeftBrace) {
+		return nil
+	}
+
+	while.Body = p.parseBlockStatement()
+
+	return while
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {

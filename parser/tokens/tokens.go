@@ -16,6 +16,7 @@ var keywords = map[string]TokenType{
 	"false":  False,
 	"if":     If,
 	"else":   Else,
+	"while":  While,
 }
 
 func FindKeyword(keyword string) TokenType {
@@ -57,4 +58,5 @@ const (
 	If                  TokenType = 27
 	Else                TokenType = 27
 	String              TokenType = 28
+	While               TokenType = 29
 )

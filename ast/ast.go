@@ -195,6 +195,23 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
+type WhileLiteral struct {
+	Token     tokens.Token
+	Condition Expression
+	Body      *BlockStatement
+}
+
+func (ie *WhileLiteral) expressionNode()    {}
+func (ie *WhileLiteral) TokenValue() string { return ie.Token.Value }
+func (ie *WhileLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("while")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Body.String())
+	return out.String()
+}
+
 type FunctionLiteral struct {
 	Token      tokens.Token // The 'fn' token
 	Parameters []*Identifier
