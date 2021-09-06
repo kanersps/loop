@@ -127,6 +127,23 @@ func TestParser_PrefixExpressions(t *testing.T) {
 	}
 }
 
+func TestParser_WhileLoop(t *testing.T) {
+	input := `
+	while(true) {
+		return "test";
+	}
+`
+
+	l := lexer.Create(input)
+	p := Create(l)
+
+	program := p.ParseProgram()
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) is not correct. expected=%d. got=%d", 1, len(program.Statements))
+	}
+}
+
 func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 	integ, ok := il.(*ast.IntegerLiteral)
 	if !ok {

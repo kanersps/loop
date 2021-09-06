@@ -136,6 +136,7 @@ func TestEval_ErrorHandling(t *testing.T) {
 		{"if(true) { true + false; }", "UNKNOWN-OPERATOR: BOOLEAN + BOOLEAN"},
 		{"test", "UNKNOWN-IDENTIFIER: test"},
 		{`"Test" - "Test"`, "UNKNOWN-OPERATOR: STRING - STRING"},
+		{`while(true - 2) { return ""; }`, "TYPE-MISMATCH: BOOLEAN - INTEGER"},
 	}
 
 	for _, tc := range tests {
@@ -236,6 +237,39 @@ func TestEval_StringConcatenation(t *testing.T) {
 
 	if str.Value != "Testing two" {
 		t.Fatalf("String has incorrect value expected=%s. got=%s", "Testing two", str.Value)
+	}
+}
+
+func TestEval_WhileLoop(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`var executed = 0; while(executed < 5) { var executed = executed + 1; }; executed`, 5},
+		{`var executed = 0; while(executed < 20) { var executed = executed + 1; }; executed`, 20},
+		{`var execute = true; while(execute) { var execute = false; }; execute`, false},
+	}
+
+	for _, tc := range tests {
+		evaluated := testEval(tc.input)
+
+		integer, ok := evaluated.(*object.Integer)
+
+		if ok {
+			if integer.Value != int64(tc.expected.(int)) {
+				t.Fatalf("While loop should have executed %d times. got=%d", tc.expected, evaluated.(*object.Integer).Value)
+			}
+		} else {
+			boolean, ok := evaluated.(*object.Boolean)
+
+			if !ok {
+				t.Fatalf("While loop returned incorrect type. expected=%+v. got=%+v", object.BOOLEAN, evaluated.Type())
+			} else {
+				if boolean.Value != tc.expected {
+					t.Fatalf("While loop should have returned %t. got=%t", tc.expected, boolean.Value)
+				}
+			}
+		}
 	}
 }
 
