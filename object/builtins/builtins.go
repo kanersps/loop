@@ -6,7 +6,7 @@ import (
 )
 
 var Functions = map[string]*object.Builtin{
-	"len": &object.Builtin{
+	"len": {
 		Func: func(args ...object.Object) object.Object {
 			if len(args) <= 0 || len(args) >= 2 {
 				return &object.Error{Message: fmt.Sprintf("WRONG NUMBER OF ARGUMENTS TO BUILT-IN FUNCTION `len`. expected=1. got=%d", len(args))}
