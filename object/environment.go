@@ -1,5 +1,6 @@
 package object
 
+// TODO: fix memory leak with assignments to existing objects
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
 	return &Environment{store: s}

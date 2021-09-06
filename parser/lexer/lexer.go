@@ -104,6 +104,8 @@ func (l *Lexer) FindToken() tokens.Token {
 
 func (l *Lexer) ReadIdentifier() string {
 	position := l.position
+
+	// TODO: Add support for numbers in identifiers
 	for isLetter(l.ch) {
 		l.ReadCharacter()
 	}
