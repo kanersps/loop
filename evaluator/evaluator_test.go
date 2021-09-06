@@ -305,6 +305,49 @@ func TestEval_BuiltinFunctions(t *testing.T) {
 	}
 }
 
+func TestEval_Arrays(t *testing.T) {
+	input := `[1, 2 + 2, "three"]`
+
+	evaluated := testEval(input)
+
+	result, ok := evaluated.(*object.Array)
+
+	if !ok {
+		t.Fatalf("evaluated.Type IS NOT object.Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(result.Elements) != 3 {
+		t.Fatalf("Array does not contain correct amount of elements. expected=%d. got=%d", 3, len(result.Elements))
+	}
+
+	testIntegerObject(t, result.Elements[0], 1)
+	testIntegerObject(t, result.Elements[1], 4)
+}
+
+func TestEval_IndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`[20, 1, 30][1]`, 1},
+		{`[20, 1, 30][2]`, 30},
+		{`[20, 1, 30][0]`, 20},
+		{`[3 * 2, 1, 30][0]`, 6},
+		{`var test = 0; [1, 2, 3][test]`, 1},
+	}
+
+	for _, tc := range tests {
+		evaluated := testEval(tc.input)
+		integer, ok := tc.expected.(int)
+
+		if !ok {
+			testNullObject(t, evaluated)
+		} else {
+			testIntegerObject(t, evaluated, int64(integer))
+		}
+	}
+}
+
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.Boolean)
 	if !ok {

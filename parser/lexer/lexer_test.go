@@ -19,6 +19,8 @@ func TestLexer_FindToken(tester *testing.T) {
 	"test two"
 
 	while(true) {}
+	
+	[10, 20]
 `
 
 	tests := []struct {
@@ -68,6 +70,13 @@ func TestLexer_FindToken(tester *testing.T) {
 		{tokens.RightParentheses, ")"},
 		{tokens.LeftBrace, "{"},
 		{tokens.RightBrace, "}"},
+
+		// Array
+		{tokens.LeftBracket, "["},
+		{tokens.Number, "10"},
+		{tokens.Comma, ","},
+		{tokens.Number, "20"},
+		{tokens.RightBracket, "]"},
 	}
 
 	l := Create(input)

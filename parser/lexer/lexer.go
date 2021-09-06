@@ -56,6 +56,10 @@ func (l *Lexer) FindToken() tokens.Token {
 		returnToken = tokens.Token{TokenType: tokens.LeftBrace, Value: string(l.ch)}
 	case '}':
 		returnToken = tokens.Token{TokenType: tokens.RightBrace, Value: string(l.ch)}
+	case '[':
+		returnToken = tokens.Token{TokenType: tokens.LeftBracket, Value: string(l.ch)}
+	case ']':
+		returnToken = tokens.Token{TokenType: tokens.RightBracket, Value: string(l.ch)}
 	case '!':
 		if l.peekChar() == '=' {
 			ch := l.ch

@@ -11,6 +11,19 @@ import (
 )
 
 var variables = map[string]int{}
+
+const (
+	_ int = iota
+	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
+	INDEX
+)
+
 var precedences = map[tokens.TokenType]int{
 	tokens.EqualsInfix:     EQUALS,
 	tokens.NotEquals:       EQUALS,
@@ -21,6 +34,7 @@ var precedences = map[tokens.TokenType]int{
 	tokens.Slash:           PRODUCT,
 	tokens.Asterisk:        PRODUCT,
 	tokens.LeftParentheses: CALL,
+	tokens.LeftBracket:     INDEX,
 }
 
 func (p *Parser) peekPrecedence() int {
@@ -108,6 +122,7 @@ func Create(l *lexer.Lexer) *Parser {
 	p.registerPrefix(tokens.Function, p.parseFunctionLiteral)
 	p.registerPrefix(tokens.String, p.parseStringLiteral)
 	p.registerPrefix(tokens.While, p.parseWhileLiteral)
+	p.registerPrefix(tokens.LeftBracket, p.parseArrayLiteral)
 
 	// Infix parsers
 	p.infixParseFns = make(map[tokens.TokenType]infixParseFn)
@@ -120,6 +135,7 @@ func Create(l *lexer.Lexer) *Parser {
 	p.registerInfix(tokens.LessThan, p.parseInfixExpression)
 	p.registerInfix(tokens.GreaterThan, p.parseInfixExpression)
 	p.registerInfix(tokens.LeftParentheses, p.parseCallExpression)
+	p.registerInfix(tokens.LeftBracket, p.parseIndexExpression)
 
 	p.ExtractToken()
 	p.ExtractToken()
@@ -130,6 +146,23 @@ func Create(l *lexer.Lexer) *Parser {
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	exp := &ast.IndexExpression{
+		Token: p.curToken,
+		Left:  left,
+	}
+
+	p.ExtractToken()
+
+	exp.Index = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(tokens.RightBracket) {
+		return nil
+	}
+
 	return exp
 }
 
@@ -157,6 +190,34 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 		return nil
 	}
 	return args
+}
+
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	array := &ast.ArrayLiteral{
+		Token:    p.curToken,
+		Elements: []ast.Expression{},
+	}
+
+	if p.peekTokenIs(tokens.RightBracket) {
+		p.ExtractToken()
+		return array
+	}
+
+	p.ExtractToken()
+
+	array.Elements = append(array.Elements, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(tokens.Comma) {
+		p.ExtractToken()
+		p.ExtractToken()
+		array.Elements = append(array.Elements, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(tokens.RightBracket) {
+		return nil
+	}
+
+	return array
 }
 
 func (p *Parser) parseWhileLiteral() ast.Expression {
@@ -352,17 +413,6 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseExpressionStatement()
 	}
 }
-
-const (
-	_ int = iota
-	LOWEST
-	EQUALS
-	LESSGREATER
-	SUM
-	PRODUCT
-	PREFIX
-	CALL
-)
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
