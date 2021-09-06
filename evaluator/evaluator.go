@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kanersps/loop/ast"
 	"github.com/kanersps/loop/object"
+	"github.com/kanersps/loop/object/builtins"
 )
 
 var (
@@ -98,15 +99,16 @@ func throwError(format string, a ...interface{}) *object.Error {
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-
-	if !ok {
-		return throwError("UNKNOWN-FUNCTION: %s", function.Type())
+	switch fn := fn.(type) {
+	case *object.Function:
+		extendedEnv := extendedFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
+	case *object.Builtin:
+		return fn.Func(args...)
+	default:
+		return throwError("UNKNOWN-FUNCTION: %s", fn.Type())
 	}
-
-	extendedEnv := extendedFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
 }
 
 func extendedFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
@@ -146,6 +148,10 @@ func evalExpressions(expressions []ast.Expression, env *object.Environment) []ob
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
 	value, ok := env.Get(node.Value)
 	if !ok {
+		if builtin, ok := builtins.Functions[node.Value]; ok {
+			return builtin
+		}
+
 		return throwError("UNKNOWN-IDENTIFIER: %s", node.Value)
 	}
 

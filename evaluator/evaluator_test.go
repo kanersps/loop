@@ -273,6 +273,38 @@ func TestEval_WhileLoop(t *testing.T) {
 	}
 }
 
+func TestEval_BuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("test")`, 4},
+		{`len(1)`, "ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=INTEGER"},
+		{`len("1", "2")`, "WRONG NUMBER OF ARGUMENTS TO BUILT-IN FUNCTION `len`. expected=1. got=2"},
+		{`len()`, "WRONG NUMBER OF ARGUMENTS TO BUILT-IN FUNCTION `len`. expected=1. got=0"},
+	}
+
+	for _, tc := range tests {
+		evaluated := testEval(tc.input)
+
+		switch expected := tc.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			err, ok := evaluated.(*object.Error)
+			if !ok {
+				t.Errorf("object is not object.Error. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+
+			if err.Message != expected {
+				t.Errorf("Wrong error received. expected=%q. got=%q", expected, err.Message)
+			}
+		}
+	}
+}
+
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.Boolean)
 	if !ok {
