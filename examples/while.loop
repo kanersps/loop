@@ -1,5 +1,7 @@
 var executedTimes = 0;
 
-while(executedTimes < 20) { var test = test + 1; var executedTimes = executedTimes + 1; }
+while(executedTimes < 20) {
+    var executedTimes = executedTimes + 1;
+}
 
 executedTimes
