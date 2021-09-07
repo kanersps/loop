@@ -5,6 +5,12 @@ import (
 	"github.com/kanersps/loop/object"
 )
 
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+	NULL  = &object.Null{}
+)
+
 var Functions = map[string]*object.Builtin{
 	"len": {
 		Func: func(args ...object.Object) object.Object {
@@ -34,6 +40,24 @@ var Functions = map[string]*object.Builtin{
 			}
 
 			return &object.Array{Elements: append(array.Elements, args[1:]...)}
+		},
+	},
+	"print": {
+		Func: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Print(arg.Inspect())
+			}
+
+			return NULL
+		},
+	},
+	"println": {
+		Func: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Println(arg.Inspect())
+			}
+
+			return NULL
 		},
 	},
 }

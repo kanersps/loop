@@ -9,7 +9,6 @@ type Token struct {
 
 var keywords = map[string]TokenType{
 	"var":    VariableDeclaration,
-	"print":  Print,
 	"func":   Function,
 	"return": Return,
 	"true":   True,

@@ -7,12 +7,6 @@ import (
 	"github.com/kanersps/loop/object/builtins"
 )
 
-var (
-	TRUE  = &object.Boolean{Value: true}
-	FALSE = &object.Boolean{Value: false}
-	NULL  = &object.Null{}
-)
-
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
@@ -173,7 +167,7 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 
 	pair, ok := hashObj.Pairs[idx]
 	if !ok {
-		return NULL
+		return builtins.NULL
 	}
 
 	return pair.Value
@@ -253,12 +247,12 @@ func evalIfExpression(node *ast.IfExpression, env *object.Environment) object.Ob
 		return condition
 	}
 
-	if condition == TRUE {
+	if condition == builtins.TRUE {
 		return Eval(node.Consequence, env)
 	} else if node.Alternative != nil {
 		return Eval(node.Alternative, env)
 	} else {
-		return NULL
+		return builtins.NULL
 	}
 }
 
@@ -271,7 +265,7 @@ func evalWhileExpression(node *ast.WhileLiteral, env *object.Environment) object
 
 	var lastEvaluation object.Object
 
-	for condition == TRUE {
+	for condition == builtins.TRUE {
 		lastEvaluation = Eval(node.Body, env)
 		condition = Eval(node.Condition, env)
 	}
@@ -352,20 +346,20 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	case "-":
 		return evalMinusPrefixOperator(right)
 	default:
-		return NULL
+		return builtins.NULL
 	}
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
 	switch right {
-	case TRUE:
-		return FALSE
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
+	case builtins.TRUE:
+		return builtins.FALSE
+	case builtins.FALSE:
+		return builtins.TRUE
+	case builtins.NULL:
+		return builtins.TRUE
 	default:
-		return FALSE
+		return builtins.FALSE
 	}
 }
 
@@ -387,9 +381,9 @@ func isError(obj object.Object) bool {
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
-		return TRUE
+		return builtins.TRUE
 	}
-	return FALSE
+	return builtins.FALSE
 }
 
 func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
