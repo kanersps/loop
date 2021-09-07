@@ -6,6 +6,7 @@ type Environment struct {
 }
 
 func (e *Environment) Set(name string, value Object) Object {
+	// TODO: recursive search
 	if e.Outer != nil {
 		if _, exists := e.Outer.Store[name]; exists {
 			e.Outer.Store[name] = value
