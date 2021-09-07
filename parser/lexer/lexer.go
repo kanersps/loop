@@ -1,8 +1,18 @@
 package lexer
 
 import (
+	"fmt"
 	"github.com/kanersps/loop/parser/tokens"
 )
+
+type Test struct {
+	test int
+	two  string
+}
+
+func (t *Test) PrintTwo() {
+	fmt.Println(t.two)
+}
 
 type Lexer struct {
 	input        string
@@ -14,6 +24,7 @@ type Lexer struct {
 func Create(value string) *Lexer {
 	lexer := &Lexer{input: value}
 	lexer.ReadCharacter()
+
 	return lexer
 }
 
@@ -60,6 +71,8 @@ func (l *Lexer) FindToken() tokens.Token {
 		returnToken = tokens.Token{TokenType: tokens.LeftBracket, Value: string(l.ch)}
 	case ']':
 		returnToken = tokens.Token{TokenType: tokens.RightBracket, Value: string(l.ch)}
+	case ':':
+		returnToken = tokens.Token{TokenType: tokens.Colon, Value: string(l.ch)}
 	case '!':
 		if l.peekChar() == '=' {
 			ch := l.ch

@@ -61,4 +61,5 @@ const (
 	While               TokenType = 29
 	LeftBracket         TokenType = 30
 	RightBracket        TokenType = 31
+	Colon               TokenType = 32
 )

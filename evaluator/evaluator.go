@@ -111,6 +111,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return evalIndexExpression(left, index)
+	case *ast.HashLiteral:
+		return evalHashLiteral(node, env)
 	}
 	return nil
 }
@@ -119,16 +121,62 @@ func throwError(format string, a ...interface{}) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
+func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
+	pairs := make(map[object.HashKey]object.HashPair)
+
+	for keyNode, valueNode := range node.Pairs {
+		key := Eval(keyNode, env)
+		if isError(key) {
+			return key
+		}
+
+		hashKey, ok := key.(object.Hashable)
+		if !ok {
+			return throwError("HASHMAP KEY IS INCORRECT TYPE. got=%s", key.Type())
+		}
+
+		value := Eval(valueNode, env)
+		if isError(value) {
+			return value
+		}
+
+		hashed := hashKey.HashKey()
+		pairs[hashed] = object.HashPair{
+			Key:   key,
+			Value: value,
+		}
+	}
+
+	return &object.Hash{Pairs: pairs}
+}
+
 func evalIndexExpression(left, index object.Object) object.Object {
-	if left.Type() != object.ARRAY {
-		return throwError("ATTEMPTED INDEXING INVALID TYPE %s", left.Type())
+	if left.Type() == object.ARRAY {
+		if index.Type() != object.INTEGER {
+			return throwError("INVALID INDEX. expected=INTEGER. got=%s", index.Type())
+		}
+
+		return evalArrayIndexExpression(left, index)
 	}
 
-	if index.Type() != object.INTEGER {
-		return throwError("INVALID INDEX. expected=INTEGER. got=%s", index.Type())
+	if left.Type() == object.HASH {
+		return evalHashIndexExpression(left, index)
 	}
 
-	return evalArrayIndexExpression(left, index)
+	return throwError("ATTEMPTED INDEXING INVALID TYPE %s", left.Type())
+}
+
+func evalHashIndexExpression(hash, index object.Object) object.Object {
+	hashObj := hash.(*object.Hash)
+
+	idx := index.(object.Hashable).HashKey()
+
+	pair, ok := hashObj.Pairs[idx]
+	if !ok {
+		return NULL
+	}
+
+	return pair.Value
 }
 
 func evalArrayIndexExpression(array, index object.Object) object.Object {

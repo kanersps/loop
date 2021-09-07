@@ -21,6 +21,8 @@ func TestLexer_FindToken(tester *testing.T) {
 	while(true) {}
 	
 	[10, 20]
+
+	{"test": "one"}
 `
 
 	tests := []struct {
@@ -77,6 +79,13 @@ func TestLexer_FindToken(tester *testing.T) {
 		{tokens.Comma, ","},
 		{tokens.Number, "20"},
 		{tokens.RightBracket, "]"},
+
+		// HashMap
+		{tokens.LeftBrace, "{"},
+		{tokens.String, "test"},
+		{tokens.Colon, ":"},
+		{tokens.String, "one"},
+		{tokens.RightBrace, "}"},
 	}
 
 	l := Create(input)

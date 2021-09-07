@@ -304,3 +304,23 @@ func (idx *IndexExpression) String() string {
 	out.WriteString("])")
 	return out.String()
 }
+
+type HashLiteral struct {
+	Token tokens.Token
+	Pairs map[Expression]Expression
+}
+
+func (hash *HashLiteral) expressionNode()    {}
+func (hash *HashLiteral) TokenValue() string { return hash.Token.Value }
+func (hash *HashLiteral) String() string {
+	var out bytes.Buffer
+	pairs := []string{}
+	for key, value := range hash.Pairs {
+		pairs = append(pairs, key.String()+":"+value.String())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
+}

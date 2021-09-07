@@ -15,7 +15,7 @@ var Functions = map[string]*object.Builtin{
 			arg, ok := args[0].(*object.String)
 
 			if !ok {
-				return &object.Error{Message: fmt.Sprintf("ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=%v. epxected=STRING", args[0].Type())}
+				return &object.Error{Message: fmt.Sprintf("ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=%v. expected=STRING", args[0].Type())}
 			}
 
 			return &object.Integer{Value: int64(len(arg.Value))}

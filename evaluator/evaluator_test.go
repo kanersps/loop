@@ -280,7 +280,7 @@ func TestEval_BuiltinFunctions(t *testing.T) {
 	}{
 		{`len("")`, 0},
 		{`len("test")`, 4},
-		{`len(1)`, "ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=INTEGER"},
+		{`len(1)`, "ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=INTEGER. expected=STRING"},
 		{`len("1", "2")`, "WRONG NUMBER OF ARGUMENTS TO BUILT-IN FUNCTION `len`. expected=1. got=2"},
 		{`len()`, "WRONG NUMBER OF ARGUMENTS TO BUILT-IN FUNCTION `len`. expected=1. got=0"},
 	}
@@ -344,6 +344,85 @@ func TestEval_IndexExpressions(t *testing.T) {
 			testNullObject(t, evaluated)
 		} else {
 			testIntegerObject(t, evaluated, int64(integer))
+		}
+	}
+}
+
+func TestEval_Hashes(t *testing.T) {
+	input := `
+	var key = "hash_key"
+	{
+		key: 10,
+		2: 20,
+		true: 0,
+		"test": 10 / 2
+	}
+`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Hash)
+	if !ok {
+		t.Fatalf("Eval didn't return Hash. got=%T (%+v)", evaluated, evaluated)
+	}
+	expected := map[object.HashKey]int64{
+		(&object.String{Value: "hash_key"}).HashKey(): 10,
+		(&object.Integer{Value: 2}).HashKey():         20,
+		TRUE.HashKey():                                0,
+		(&object.String{Value: "test"}).HashKey():     5,
+	}
+	if len(result.Pairs) != len(expected) {
+		t.Fatalf("Hash has wrong num of pairs. got=%d. expected=%d", len(result.Pairs), len(expected))
+	}
+	for expectedKey, expectedValue := range expected {
+		pair, ok := result.Pairs[expectedKey]
+		if !ok {
+			t.Errorf("no pair for given key in Pairs")
+		}
+		testIntegerObject(t, pair.Value, expectedValue)
+	}
+}
+
+func TestEval_HashIndex(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`{"foo": 5}["foo"]`,
+			5,
+		},
+		{
+			`{"foo": 5}["bar"]`,
+			nil,
+		},
+		{
+			`var key = "foo"; {"foo": 5}[key]`,
+			5,
+		},
+		{
+			`{}["foo"]`,
+			nil,
+		},
+		{
+			`{5: 5}[5]`,
+			5,
+		},
+		{
+			`{true: 5}[true]`,
+			5,
+		},
+		{
+			`{false: 5}[false]`,
+			5,
+		},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
 		}
 	}
 }

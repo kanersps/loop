@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/kanersps/loop/ast"
+	"hash/fnv"
 	"strings"
 )
 
@@ -17,9 +18,46 @@ const (
 	STRING   = "STRING"
 	BUILTIN  = "BUILTIN"
 	ARRAY    = "ARRAY"
+	HASH     = "HASH"
 )
 
 type ObjectType string
+
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+type HashPair struct {
+	Key   Object
+	Value Object
+}
+
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+type Hashable interface {
+	// TODO: Cache return values of the HashKey method to improve performance
+	HashKey() HashKey
+}
+
+func (h *Hash) Type() ObjectType {
+	return HASH
+}
+
+func (h *Hash) Inspect() string {
+	var out bytes.Buffer
+	pairs := []string{}
+	for _, pair := range h.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s",
+			pair.Key.Inspect(), pair.Value.Inspect()))
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
 
 type Object interface {
 	Type() ObjectType
@@ -32,6 +70,9 @@ type Integer struct {
 
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
 func (i *Integer) Type() ObjectType { return INTEGER }
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
 
 type Boolean struct {
 	Value bool
@@ -39,6 +80,13 @@ type Boolean struct {
 
 func (b *Boolean) Type() ObjectType { return BOOLEAN }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
+func (b *Boolean) HashKey() HashKey {
+	if b.Value {
+		return HashKey{Type: b.Type(), Value: 1}
+	} else {
+		return HashKey{Type: b.Type(), Value: 0}
+	}
+}
 
 type Null struct{}
 
@@ -89,6 +137,12 @@ type String struct {
 func (s *String) Type() ObjectType { return STRING }
 func (s *String) Inspect() string {
 	return s.Value
+}
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
 
 type BuiltinFunction func(args ...Object) Object
