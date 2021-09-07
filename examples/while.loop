@@ -4,4 +4,20 @@ while(executedTimes < 20) {
     var executedTimes = executedTimes + 1;
 }
 
-executedTimes
+var for = func(array, callback) {
+    var index = 0;
+
+    while(index < len(array)) {
+        callback(index, array[index])
+
+        var index = index + 1
+    }
+}
+
+var testArray = [50, 3000, "hey", true, func(){}]
+
+for(testArray, func(key, value) {
+    print(key)
+    print(": ")
+    println(value)
+})

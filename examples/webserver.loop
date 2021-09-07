@@ -6,8 +6,13 @@ var HandleIndex = func() {
     return hits
 }
 
+var HelloWorld = func() {
+    return "Hello World!"
+}
+
 var config = {
-    "/": HandleIndex
+    "/": HandleIndex,
+    "/test": HelloWorld
 }
 
 webserver(8080, config)
