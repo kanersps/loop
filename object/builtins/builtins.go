@@ -49,13 +49,19 @@ var Functions = map[string]*models.Builtin{
 				return &models.Error{Message: fmt.Sprintf("WRONG NUMBER OF ARGUMENTS TO BUILT-IN FUNCTION `len`. expected=1. got=%d", len(args))}
 			}
 
-			arg, ok := args[0].(*models.String)
+			stringArg, ok := args[0].(*models.String)
 
-			if !ok {
-				return &models.Error{Message: fmt.Sprintf("ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=%v. expected=STRING", args[0].Type())}
+			if ok {
+				return &models.Integer{Value: int64(len(stringArg.Value))}
 			}
 
-			return &models.Integer{Value: int64(len(arg.Value))}
+			arrayArg, ok := args[0].(*models.Array)
+
+			if ok {
+				return &models.Integer{Value: int64(len(arrayArg.Elements))}
+			}
+
+			return &models.Error{Message: fmt.Sprintf("ARGUMENT INVALID TYPE TO BUILT-IN FUNCTION `len`. got=%v. expected=STRING", args[0].Type())}
 		},
 	},
 	"append": {
