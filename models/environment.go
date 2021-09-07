@@ -6,6 +6,12 @@ type Environment struct {
 }
 
 func (e *Environment) Set(name string, value Object) Object {
+	if e.Outer != nil {
+		if _, exists := e.Outer.Store[name]; exists {
+			e.Outer.Store[name] = value
+		}
+	}
+
 	e.Store[name] = value
 	return e.Store[name]
 }
