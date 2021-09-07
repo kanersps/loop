@@ -1,0 +1,13 @@
+var hits = 0;
+
+var HandleIndex = func() {
+    var hits = hits + 1
+
+    return hits
+}
+
+var config = {
+    "/": HandleIndex
+}
+
+webserver(8080, config)

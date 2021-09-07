@@ -1,13 +1,16 @@
 package object
 
-import "testing"
+import (
+	"github.com/kanersps/loop/models"
+	"testing"
+)
 
 func TestString_HashKey(t *testing.T) {
-	test1 := &String{Value: "test"}
-	test2 := &String{Value: "test"}
+	test1 := &models.String{Value: "test"}
+	test2 := &models.String{Value: "test"}
 
-	test3 := &String{Value: "test2"}
-	test4 := &String{Value: "test2"}
+	test3 := &models.String{Value: "test2"}
+	test4 := &models.String{Value: "test2"}
 
 	if test1.HashKey() != test2.HashKey() {
 		t.Errorf("strings with same content have different hash keys")

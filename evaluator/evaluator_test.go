@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"github.com/kanersps/loop/models"
 	"github.com/kanersps/loop/object"
 	"github.com/kanersps/loop/parser"
 	"github.com/kanersps/loop/parser/lexer"
@@ -111,7 +112,7 @@ func TestEval_ReturnStatements(t *testing.T) {
 	for _, tc := range tests {
 		evaluated := testEval(tc.input)
 
-		evals, ok := evaluated.(*object.Integer)
+		evals, ok := evaluated.(*models.Integer)
 
 		if !ok {
 			t.Errorf("No return object returned. got=%T(%+v)", evaluated, evaluated)
@@ -142,7 +143,7 @@ func TestEval_ErrorHandling(t *testing.T) {
 	for _, tc := range tests {
 		evaluated := testEval(tc.input)
 
-		errObj, ok := evaluated.(*object.Error)
+		errObj, ok := evaluated.(*models.Error)
 
 		if !ok {
 			t.Errorf("No error object returned. got=%T(%+v)", evaluated, evaluated)
@@ -150,7 +151,7 @@ func TestEval_ErrorHandling(t *testing.T) {
 		}
 
 		if errObj.Message != tc.expected {
-			t.Errorf("wrong error returned. expected=%q, got=%q", tc.expected, evaluated.(*object.Error).Message)
+			t.Errorf("wrong error returned. expected=%q, got=%q", tc.expected, evaluated.(*models.Error).Message)
 		}
 	}
 }
@@ -175,7 +176,7 @@ func TestEval_Functions(t *testing.T) {
 	input := "func(x) { x * 2; };"
 
 	evaluated := testEval(input)
-	fn, ok := evaluated.(*object.Function)
+	fn, ok := evaluated.(*models.Function)
 
 	if !ok {
 		t.Fatalf("Object is not a function. got=%T (%+v)", evaluated, evaluated)
@@ -213,7 +214,7 @@ func TestEval_Strings(t *testing.T) {
 	input := `"Testing two"`
 
 	evaluated := testEval(input)
-	str, ok := evaluated.(*object.String)
+	str, ok := evaluated.(*models.String)
 
 	if !ok {
 		t.Fatalf("Object is not string. got=%T (%+v)", evaluated, evaluated)
@@ -229,7 +230,7 @@ func TestEval_StringConcatenation(t *testing.T) {
 
 	evaluated := testEval(input)
 
-	str, ok := evaluated.(*object.String)
+	str, ok := evaluated.(*models.String)
 
 	if !ok {
 		t.Fatalf("Object is not string. got=%T (%+v)", evaluated, evaluated)
@@ -253,17 +254,17 @@ func TestEval_WhileLoop(t *testing.T) {
 	for _, tc := range tests {
 		evaluated := testEval(tc.input)
 
-		integer, ok := evaluated.(*object.Integer)
+		integer, ok := evaluated.(*models.Integer)
 
 		if ok {
 			if integer.Value != int64(tc.expected.(int)) {
-				t.Fatalf("While loop should have executed %d times. got=%d", tc.expected, evaluated.(*object.Integer).Value)
+				t.Fatalf("While loop should have executed %d times. got=%d", tc.expected, evaluated.(*models.Integer).Value)
 			}
 		} else {
-			boolean, ok := evaluated.(*object.Boolean)
+			boolean, ok := evaluated.(*models.Boolean)
 
 			if !ok {
-				t.Fatalf("While loop returned incorrect type. expected=%+v. got=%+v", object.BOOLEAN, evaluated.Type())
+				t.Fatalf("While loop returned incorrect type. expected=%+v. got=%+v", models.BOOLEAN, evaluated.Type())
 			} else {
 				if boolean.Value != tc.expected {
 					t.Fatalf("While loop should have returned %t. got=%t", tc.expected, boolean.Value)
@@ -292,9 +293,9 @@ func TestEval_BuiltinFunctions(t *testing.T) {
 		case int:
 			testIntegerObject(t, evaluated, int64(expected))
 		case string:
-			err, ok := evaluated.(*object.Error)
+			err, ok := evaluated.(*models.Error)
 			if !ok {
-				t.Errorf("object is not object.Error. got=%T (%+v)", evaluated, evaluated)
+				t.Errorf("object is not models.Error. got=%T (%+v)", evaluated, evaluated)
 				continue
 			}
 
@@ -310,10 +311,10 @@ func TestEval_Arrays(t *testing.T) {
 
 	evaluated := testEval(input)
 
-	result, ok := evaluated.(*object.Array)
+	result, ok := evaluated.(*models.Array)
 
 	if !ok {
-		t.Fatalf("evaluated.Type IS NOT object.Array. got=%T (%+v)", evaluated, evaluated)
+		t.Fatalf("evaluated.Type IS NOT models.Array. got=%T (%+v)", evaluated, evaluated)
 	}
 
 	if len(result.Elements) != 3 {
@@ -360,15 +361,15 @@ func TestEval_Hashes(t *testing.T) {
 `
 
 	evaluated := testEval(input)
-	result, ok := evaluated.(*object.Hash)
+	result, ok := evaluated.(*models.Hash)
 	if !ok {
 		t.Fatalf("Eval didn't return Hash. got=%T (%+v)", evaluated, evaluated)
 	}
-	expected := map[object.HashKey]int64{
-		(&object.String{Value: "hash_key"}).HashKey(): 10,
-		(&object.Integer{Value: 2}).HashKey():         20,
-		TRUE.HashKey():                                0,
-		(&object.String{Value: "test"}).HashKey():     5,
+	expected := map[models.HashKey]int64{
+		(&models.String{Value: "hash_key"}).HashKey(): 10,
+		(&models.Integer{Value: 2}).HashKey():         20,
+		models.TRUE.HashKey():                         0,
+		(&models.String{Value: "test"}).HashKey():     5,
 	}
 	if len(result.Pairs) != len(expected) {
 		t.Fatalf("Hash has wrong num of pairs. got=%d. expected=%d", len(result.Pairs), len(expected))
@@ -427,8 +428,8 @@ func TestEval_HashIndex(t *testing.T) {
 	}
 }
 
-func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
-	result, ok := obj.(*object.Boolean)
+func testBooleanObject(t *testing.T, obj models.Object, expected bool) bool {
+	result, ok := obj.(*models.Boolean)
 	if !ok {
 		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
 		return false
@@ -441,8 +442,8 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
-func testNullObject(t *testing.T, obj object.Object) bool {
-	if obj != NULL {
+func testNullObject(t *testing.T, obj models.Object) bool {
+	if obj != models.NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}
@@ -450,15 +451,15 @@ func testNullObject(t *testing.T, obj object.Object) bool {
 	return true
 }
 
-func testEval(input string) object.Object {
+func testEval(input string) models.Object {
 	l := lexer.Create(input)
 	p := parser.Create(l)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
 	return Eval(program, env)
 }
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	result, ok := obj.(*object.Integer)
+func testIntegerObject(t *testing.T, obj models.Object, expected int64) bool {
+	result, ok := obj.(*models.Integer)
 	if !ok {
 		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
 		return false
